@@ -11,6 +11,8 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+let map, mapEvent;
+
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     function (position) {
@@ -22,28 +24,18 @@ if (navigator.geolocation) {
 
       const coords = [latitude, longitude];
 
-      const map = L.map('map').setView(coords, 14);
+      map = L.map('map').setView(coords, 14);
 
       L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      map.on('click', function (mapEvent) {
-        const { lat, lng } = mapEvent.latlng;
-        L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup(
-            L.popup({
-              maxHeight: 250,
-              minWidth: 100,
-              autoClose: false,
-              closeOnClick: false,
-              className: 'running-popup',
-            }),
-          )
-          .setPopupContent('Workout')
-          .openPopup();
+      // Handling clicks on map
+      map.on('click', function (mapE) {
+        mapEvent = mapE;
+        form.classList.remove('hidden');
+        inputDistance.focus();
       });
     },
     function () {
@@ -51,3 +43,37 @@ if (navigator.geolocation) {
     },
   );
 }
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  // Clear input fields
+  inputDistance.value =
+    inputDuration.value =
+    inputCadence.value =
+    inputElevation.value =
+      '';
+
+  // Display marker
+  const { lat, lng } = mapEvent.latlng;
+  L.marker([lat, lng])
+    .addTo(map)
+    .bindPopup(
+      L.popup({
+        maxHeight: 250,
+        minWidth: 100,
+        autoClose: false,
+        closeOnClick: false,
+        className: 'running-popup',
+      }),
+    )
+    .setPopupContent('Workout')
+    .openPopup();
+});
+
+// Toggle the mode "Running" and "Cycling" in the input form to change the input unit to the corresponding unit: step/min ("Running") and meters ("Cycling")
+
+inputType.addEventListener('change', function () {
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+});
