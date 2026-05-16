@@ -66,12 +66,15 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const btnDelete = document.querySelector('.btn--delete');
+const btnReset = document.querySelector('.btn--reset');
 
 class App {
   #map;
   #mapZoomLevel = 14;
   #mapEvent;
   #workouts = [];
+  #selectedWorkoutId;
   constructor() {
     // Get user's position
     this._getPosition();
@@ -86,6 +89,8 @@ class App {
     // Toggle the mode "Running" and "Cycling" in the input form to change the input unit to the corresponding unit: step/min ("Running") and meters ("Cycling")
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this)); // Event Delegation
+    btnDelete.addEventListener('click', this._deleteWorkout.bind(this));
+    btnReset.addEventListener('click', this.resetStorage.bind(this));
   }
 
   _getPosition() {
@@ -268,15 +273,36 @@ class App {
     if (!workoutEl) return;
 
     const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
+    if (!workout) return;
 
-    this.#map.setView(workout.coords, this.#mapZoomLevel, {
-      animate: true,
-      pan: { duration: 1 },
-    });
+    this.#selectedWorkoutId = workout.id;
+    document
+      .querySelectorAll('.workout')
+      .forEach(work => work.classList.remove('workout--selected'));
+    workoutEl.classList.add('workout--selected');
+
+    if (this.#map) {
+      this.#map.setView(workout.coords, this.#mapZoomLevel, {
+        animate: true,
+        pan: { duration: 1 },
+      });
+    }
 
     // Using public interface - TEST (Not applied for application)
     workout._click();
 
+  }
+
+  _deleteWorkout() {
+    if (!this.#selectedWorkoutId) {
+      return alert('Please select a workout to delete');
+    }
+
+    this.#workouts = this.#workouts.filter(
+      work => work.id !== this.#selectedWorkoutId
+    );
+    this._setLocalStorage();
+    location.reload();
   }
 
   _setLocalStorage() {

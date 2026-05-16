@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="shortcut icon" type="image/png" href="/icon.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="icon.png?v=4" />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
@@ -34,7 +34,13 @@
   </head>
   <body>
     <div class="sidebar">
-      <img src="logo.png" alt="Logo" class="logo" />
+      <div class="sidebar__header">
+        <img src="logo.png" alt="Logo" class="logo" />
+        <div class="sidebar__actions">
+          <button class="btn btn--delete" type="button">Delete</button>
+          <button class="btn btn--reset" type="button">Reset All</button>
+        </div>
+      </div>
 
       <ul class="workouts">
         <form class="form hidden">

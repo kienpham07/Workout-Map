@@ -49,10 +49,53 @@ a:visited {
   flex-direction: column;
 }
 
-.logo {
-  height: 5.2rem;
-  align-self: center;
+.sidebar__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
   margin-bottom: 4rem;
+}
+
+.logo {
+  height: 18rem;
+  max-width: 26rem;
+  object-fit: contain;
+}
+
+.sidebar__actions {
+  position: absolute;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.btn {
+  border: none;
+  border-radius: 5px;
+  padding: 0.8rem 1.2rem;
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-dark--1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.btn--delete {
+  background-color: #ff6b6b;
+}
+
+.btn--reset {
+  background-color: var(--color-brand--1);
 }
 
 .workouts {
@@ -82,6 +125,11 @@ a:visited {
 }
 .workout--cycling {
   border-left: 5px solid var(--color-brand--1);
+}
+
+.workout--selected {
+  outline: 2px solid var(--color-light--2);
+  outline-offset: -2px;
 }
 
 .workout__title {
