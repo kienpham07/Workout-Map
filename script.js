@@ -73,8 +73,14 @@ class App {
   #mapEvent;
   #workouts = [];
   constructor() {
+    // Get user's position
     this._getPosition();
 
+    // Get data from local storage
+    this._getLocalStorage();
+
+    // Attach event handler
+    // When the user clicks on the "Add workout" button, the form is displayed
     form.addEventListener('submit', this._newWorkout.bind(this));
 
     // Toggle the mode "Running" and "Cycling" in the input form to change the input unit to the corresponding unit: step/min ("Running") and meters ("Cycling")
@@ -98,7 +104,7 @@ class App {
     const coords = [latitude, longitude];
 
     console.log(
-      `https://www.google.com/maps/@${latitude},${longitude},15z?entry=ttu&g_ep=EgoyMDI2MDQxMi4wIKXMDSoASAFQAw%3D%3D`,
+      `https://www.google.com/maps/@${latitude},${longitude},15z`
     );
 
     this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
@@ -110,6 +116,10 @@ class App {
 
     // Handling clicks on map
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    })
   }
 
   _showForm(mapE) {
@@ -126,7 +136,7 @@ class App {
     // Effects for a form section
     form.style.display = 'none';
     form.classList.add('hidden');
-    setTimeout(() => (form.style.display = 'grid', 1000));
+    setTimeout(() => form.style.display = 'grid', 1000);
   }
 
   _toggleElevationField() {
@@ -175,7 +185,6 @@ class App {
 
     // Add that new object to the workout array
     this.#workouts.push(workout);
-    console.log(workout);
 
     // Render the workout on the map as marker
     this._renderWorkoutMarker(workout);
@@ -185,6 +194,9 @@ class App {
 
     // Hide form + clear input fields
     this._hideForm();
+
+    // Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   // Display marker
@@ -252,12 +264,10 @@ class App {
 
   _moveToPopup(e) { // Event Delegation
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
 
     if (!workoutEl) return;
 
     const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
-    console.log(workout);
 
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
@@ -269,6 +279,35 @@ class App {
 
   }
 
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    if (!data) return;
+
+    this.#workouts = data.map(work => {
+      Object.setPrototypeOf( // Because JSON turns class instances into plain objects, so restored workouts no longer inherit _click() and other methods from Workout.
+        work, // Therefore, we have to revive those saved objects back onto the Running/Cycling prototypes when loading them.
+        work.type === 'running' ? Running.prototype : Cycling.prototype
+      );
+      work.date = new Date(work.date);
+      work.clicks ??= 0;
+      return work;
+    });
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+      // this._renderWorkoutMarker(work); (Error because at the beginning, the map is not loaded to render the marker.)
+      // Solution: Need to place on the load map function
+    });
+  }
+
+  resetStorage() {
+    localStorage.removeItem('workouts');
+    location.reload();
+  }
 }
 
 const app = new App();
