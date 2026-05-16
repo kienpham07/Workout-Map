@@ -31,7 +31,7 @@ A workout tracking web application built with vanilla JavaScript, featuring inte
 
 ### Option 1: Live Demo
 
-Visit the live application at: `Add your deployed project URL here`
+Visit the live application at: `https://workout-map-rho.vercel.app/`
 
 ### Option 2: Clone and Run Locally
 
