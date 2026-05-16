@@ -4,6 +4,7 @@
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+  clicks = 0; // TEST (Not applied for application)
 
   constructor(coords, distance, duration) {
     // this.date = ... (Old version JS)
@@ -17,6 +18,9 @@ class Workout {
     // prettier-ignore
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
+  }
+  _click() { // TEST (Not applied for application)
+    this.clicks++;
   }
 }
 
@@ -65,6 +69,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
   #map;
+  #mapZoomLevel = 14;
   #mapEvent;
   #workouts = [];
   constructor() {
@@ -74,6 +79,7 @@ class App {
 
     // Toggle the mode "Running" and "Cycling" in the input form to change the input unit to the corresponding unit: step/min ("Running") and meters ("Cycling")
     inputType.addEventListener('change', this._toggleElevationField);
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this)); // Event Delegation
   }
 
   _getPosition() {
@@ -95,7 +101,7 @@ class App {
       `https://www.google.com/maps/@${latitude},${longitude},15z?entry=ttu&g_ep=EgoyMDI2MDQxMi4wIKXMDSoASAFQAw%3D%3D`,
     );
 
-    this.#map = L.map('map').setView(coords, 14);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -242,6 +248,25 @@ class App {
     }
 
     form.insertAdjacentHTML('afterend', html);
+  }
+
+  _moveToPopup(e) { // Event Delegation
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
+    console.log(workout);
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: { duration: 1 },
+    });
+
+    // Using public interface - TEST (Not applied for application)
+    workout._click();
+
   }
 
 }
